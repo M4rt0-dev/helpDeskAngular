@@ -1,0 +1,39 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-card p-6 rounded-lg w-full max-w-lg shadow-xl">
+      <h2 class="text-xl font-bold mb-4">Nueva Incidencia</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Título</label>
+          <input type="text" [(ngModel)]="ticket().title" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Descripción</label>
+          <textarea [(ngModel)]="ticket().description" rows="4" class="w-full border rounded-lg px-3 py-2"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Categoría</label>
+            <select [(ngModel)]="ticket().category" class="w-full border rounded-lg px-3 py-2">
+              @for (cat of categories(); track cat.id) {
+                <option [value]="cat.id">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Prioridad</label>
+            <select [(ngModel)]="ticket().priority" class="w-full border rounded-lg px-3 py-2">
+              @for (prio of priorities(); track prio.id) {
+                <option [value]="prio.id">{{ prio.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button (click)="onClose.emit()" class="px-4 py-2 border rounded-lg hover:bg-muted">Cancelar</button>
+          <button (click)="submit()" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Crear Ticket</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

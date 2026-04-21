@@ -1,0 +1,8 @@
+.configuration-color-input {
+	width: 100%;
+	height: 42px;
+	padding: 0.25rem;
+	border: 1px solid var(--border);
+	border-radius: 0.75rem;
+	background: #ffffff;
+}

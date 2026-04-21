@@ -1,0 +1,389 @@
+@if (!currentUser()) {
+  <app-security-warning [issues]="securityIssues()"></app-security-warning>
+  <app-login
+    #login
+    (onLogin)="submitLogin($event, login)"
+    (onOpenRegister)="isRegisterOpen.set(true)">
+  </app-login>
+  <app-register-modal
+    [isOpen]="isRegisterOpen()"
+    (onClose)="isRegisterOpen.set(false)"
+    (onSubmit)="handleRegister($event)">
+  </app-register-modal>
+}
+
+@if (currentUser()) {
+  @let user = currentUser()!;
+  <app-security-warning [issues]="securityIssues()"></app-security-warning>
+  <div class="size-full flex bg-background">
+    <!-- Sidebar -->
+    <div class="w-72 border-r border-border bg-card">
+      <div class="p-6">
+        <!-- Logo/Header -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-1">
+            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <i-lucide name="file-text" class="w-6 h-6 text-white"></i-lucide>
+            </div>
+            <h1 class="text-2xl">HelpDesk</h1>
+          </div>
+          <p class="text-sm text-muted-foreground mt-2">Sistema de Gestión de Incidencias</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="space-y-2 mb-8">
+          @if (user.role !== 'usuario') {
+            <button
+              (click)="activeView.set('dashboard')"
+              [class.bg-primary]="activeView() === 'dashboard'"
+              [class.text-white]="activeView() === 'dashboard'"
+              [class.hover:bg-muted]="activeView() !== 'dashboard'"
+              [class.text-foreground]="activeView() !== 'dashboard'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+              <i-lucide name="layout-dashboard" class="w-5 h-5"></i-lucide>
+              <span>Dashboard</span>
+            </button>
+          }
+
+          <button
+            (click)="activeView.set('tickets')"
+            [class.bg-primary]="activeView() === 'tickets'"
+            [class.text-white]="activeView() === 'tickets'"
+            [class.hover:bg-muted]="activeView() !== 'tickets'"
+            [class.text-foreground]="activeView() !== 'tickets'"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+            <i-lucide name="ticket" class="w-5 h-5"></i-lucide>
+            <span>{{ user.role === 'usuario' ? 'Mis Tickets' : 'Tickets' }}</span>
+            <span class="ml-auto px-2 py-0.5 bg-muted text-foreground text-sm rounded">{{ stats().total }}</span>
+          </button>
+
+          @if (user.role === 'admin') {
+            <button
+              (click)="activeView.set('config')"
+              [class.bg-primary]="activeView() === 'config'"
+              [class.text-white]="activeView() === 'config'"
+              [class.hover:bg-muted]="activeView() !== 'config'"
+              [class.text-foreground]="activeView() !== 'config'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+              <i-lucide name="settings" class="w-5 h-5"></i-lucide>
+              <span>Configuración</span>
+            </button>
+            <button
+              (click)="activeView.set('logs')"
+              [class.bg-primary]="activeView() === 'logs'"
+              [class.text-white]="activeView() === 'logs'"
+              [class.hover:bg-muted]="activeView() !== 'logs'"
+              [class.text-foreground]="activeView() !== 'logs'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors">
+              <i-lucide name="shield" class="w-5 h-5"></i-lucide>
+              <span>Logs de Seguridad</span>
+            </button>
+          }
+
+          <button
+            (click)="isNotificationsOpen.set(true)"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-foreground transition-colors relative">
+            <i-lucide name="bell" class="w-5 h-5"></i-lucide>
+            <span>Notificaciones</span>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="ml-auto px-2 py-0.5 bg-red-500 text-white text-sm rounded-full">
+                {{ unreadNotificationsCount() }}
+              </span>
+            }
+          </button>
+        </div>
+
+        <!-- Buttons for specific roles -->
+        @if (user.role === 'usuario') {
+          <button
+            (click)="isNewTicketOpen.set(true)"
+            class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+            <i-lucide name="plus" class="w-5 h-5"></i-lucide>
+            <span>Nueva Incidencia</span>
+          </button>
+        }
+
+        @if (user.role === 'admin') {
+          <div class="space-y-2">
+            <button
+              (click)="isCreateTechnicianOpen.set(true)"
+              class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+              <i-lucide name="plus" class="w-5 h-5"></i-lucide>
+              <span>Crear Técnico</span>
+            </button>
+            <button
+              (click)="isCreateAdminOpen.set(true)"
+              class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+              <i-lucide name="plus" class="w-5 h-5"></i-lucide>
+              <span>Crear Administrador</span>
+            </button>
+          </div>
+        }
+
+        <!-- User Info -->
+        <div class="mt-8 p-4 border border-border rounded-lg bg-muted/50">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <i-lucide name="user" class="w-5 h-5 text-primary"></i-lucide>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm truncate">{{ user.name }}</p>
+              <p class="text-xs text-muted-foreground capitalize">{{ user.role }}</p>
+            </div>
+          </div>
+          <button
+            (click)="handleLogout()"
+            class="w-full flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-muted transition-colors text-sm">
+            <i-lucide name="log-out" class="w-4 h-4"></i-lucide>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+
+        <div class="mt-4 p-4 border border-border rounded-lg bg-muted/50">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm text-muted-foreground">Estado del Sistema</span>
+            <div class="flex items-center gap-1.5">
+              <div class="w-2 h-2 rounded-full bg-green-500"></div>
+              <span class="text-sm text-green-600">Activo</span>
+            </div>
+          </div>
+          <p class="text-xs text-muted-foreground">Versión 2.4.1 • 14/04/2026</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto">
+      
+      <section [hidden]="activeView() !== 'logs' || user.role !== 'admin'">
+        <app-security-logs></app-security-logs>
+      </section>
+
+      <section [hidden]="activeView() !== 'config' || user.role !== 'admin'">
+        <app-configuration-panel
+          [categories]="categories()"
+          [priorities]="priorities()"
+          (onUpdateCategories)="handleUpdateCategories($event)"
+          (onUpdatePriorities)="handleUpdatePriorities($event)">
+        </app-configuration-panel>
+      </section>
+
+      <!-- Dashboard View -->
+      <section [hidden]="activeView() !== 'dashboard'">
+        <div class="p-8">
+          <div class="mb-8">
+            <h2 class="text-3xl mb-2">Dashboard</h2>
+            <p class="text-muted-foreground">Resumen general del sistema de incidencias</p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-6 mb-8">
+            <app-stat-card title="Total de Tickets" [value]="stats().total" change="+3" icon="ticket" color="bg-success"></app-stat-card>
+            <app-stat-card title="En Proceso" [value]="stats().enProceso" icon="clock" color="bg-warning"></app-stat-card>
+            <app-stat-card title="Críticos" [value]="stats().criticos" change="+1" icon="alert-circle" color="bg-danger"></app-stat-card>
+          </div>
+
+          <div class="grid grid-cols-3 gap-6 mb-8">
+            <app-stat-card title="Nuevos" [value]="stats().nuevo" icon="trending-up" color="bg-info"></app-stat-card>
+            <app-stat-card title="Resueltos" [value]="stats().resuelto" icon="check-circle" color="bg-success-alt"></app-stat-card>
+            <app-stat-card title="Tasa de Resolución" value="94%" change="+2%" icon="check-circle" color="bg-success"></app-stat-card>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-xl mb-4">Tickets Recientes</h3>
+          </div>
+
+          <div class="grid gap-4">
+            @if (visibleTickets().length === 0) {
+              <div class="text-center py-12 border border-border rounded-lg bg-card">
+                <i-lucide name="file-text" class="w-12 h-12 text-muted-foreground mx-auto mb-3"></i-lucide>
+                <p class="text-muted-foreground">
+                  {{ user.role === 'usuario' ? 'No tienes tickets creados. ¡Crea tu primera incidencia!' : (user.role === 'tecnico' ? 'No tienes tickets asignados en este momento.' : 'No hay tickets en el sistema.') }}
+                </p>
+              </div>
+            }
+            
+            @for (ticket of visibleTickets() | slice:0:4; track ticket.id) {
+              <app-ticket-card
+                [ticket]="ticket"
+                [currentUserRole]="user.role"
+                [allUsers]="validUsers()"
+                [categories]="categories()"
+                (onClick)="handleOpenTicket(ticket)"
+                (onTakeTicket)="handleTakeTicket(ticket.id)">
+              </app-ticket-card>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Tickets View -->
+      <section [hidden]="activeView() !== 'tickets'">
+        <div class="p-8">
+          <div class="mb-8">
+            <h2 class="text-3xl mb-2">Gestión de Tickets</h2>
+          </div>
+
+          <div class="mb-6 space-y-4">
+            <div class="relative">
+              <i-lucide name="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"></i-lucide>
+              <input
+                type="text"
+                placeholder="Buscar por ID, título o descripción..."
+                [ngModel]="searchQuery()"
+                (ngModelChange)="searchQuery.set($event)"
+                class="w-full bg-card border border-border rounded-lg pl-12 pr-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary espaciar3"
+              />
+            </div>
+
+            @if (user.role === 'tecnico' || user.role === 'admin') {
+              <div class="flex gap-2">
+                <button 
+                  (click)="quickFilter.set('all')" 
+                  [class.bg-primary]="quickFilter() === 'all'"
+                  [class.text-white]="quickFilter() === 'all'"
+                  [class.bg-card]="quickFilter() !== 'all'"
+                  [class.border]="quickFilter() !== 'all'"
+                  [class.border-border]="quickFilter() !== 'all'"
+                  [class.text-foreground]="quickFilter() !== 'all'"
+                  [class.hover:bg-muted]="quickFilter() !== 'all'"
+                  class="px-4 py-2 rounded-lg transition-colors">
+                  Todos
+                </button>
+                <button 
+                  (click)="quickFilter.set('unassigned')" 
+                  [class.bg-primary]="quickFilter() === 'unassigned'"
+                  [class.text-white]="quickFilter() === 'unassigned'"
+                  [class.bg-card]="quickFilter() !== 'unassigned'"
+                  [class.border]="quickFilter() !== 'unassigned'"
+                  [class.border-border]="quickFilter() !== 'unassigned'"
+                  [class.text-foreground]="quickFilter() !== 'unassigned'"
+                  [class.hover:bg-muted]="quickFilter() !== 'unassigned'"
+                  class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                  <i-lucide name="alert-circle" class="w-4 h-4"></i-lucide>
+                  Sin asignar
+                </button>
+                <button 
+                  (click)="quickFilter.set('urgent')" 
+                  [class.bg-primary]="quickFilter() === 'urgent'"
+                  [class.text-white]="quickFilter() === 'urgent'"
+                  [class.bg-card]="quickFilter() !== 'urgent'"
+                  [class.border]="quickFilter() !== 'urgent'"
+                  [class.border-border]="quickFilter() !== 'urgent'"
+                  [class.text-foreground]="quickFilter() !== 'urgent'"
+                  [class.hover:bg-muted]="quickFilter() !== 'urgent'"
+                  class="px-4 py-2 rounded-lg transition-colors">
+                  Urgentes
+                </button>
+                <button 
+                  (click)="quickFilter.set('mine')" 
+                  [class.bg-primary]="quickFilter() === 'mine'"
+                  [class.text-white]="quickFilter() === 'mine'"
+                  [class.bg-card]="quickFilter() !== 'mine'"
+                  [class.border]="quickFilter() !== 'mine'"
+                  [class.border-border]="quickFilter() !== 'mine'"
+                  [class.text-foreground]="quickFilter() !== 'mine'"
+                  [class.hover:bg-muted]="quickFilter() !== 'mine'"
+                  class="px-4 py-2 rounded-lg transition-colors">
+                  Mis tickets
+                </button>
+              </div>
+            }
+
+            <div class="flex gap-4 items-center">
+              <div class="flex items-center gap-2">
+                <i-lucide name="filter" class="w-4 h-4 text-muted-foreground"></i-lucide>
+                <span class="text-sm text-muted-foreground">Filtros:</span>
+              </div>
+
+              <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" class="bg-card border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">Todos los estados</option>
+                <option value="nuevo">Nuevo</option>
+                <option value="en-proceso">En proceso</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="cerrado">Cerrado</option>
+              </select>
+
+              <select [ngModel]="priorityFilter()" (ngModelChange)="priorityFilter.set($event)" class="bg-card border border-border rounded-lg px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="all">Todas las prioridades</option>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="critica">Crítica</option>
+              </select>
+
+              <div class="ml-auto flex items-center gap-2 px-4 py-2 border border-border rounded-lg bg-muted/50">
+                <span class="text-sm">{{ filteredTickets().length }} resultados</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-4">
+            @for (ticket of filteredTickets(); track ticket.id) {
+              <app-ticket-card
+                [ticket]="ticket"
+                [currentUserRole]="user.role"
+                [allUsers]="validUsers()"
+                [categories]="categories()"
+                (onClick)="handleOpenTicket(ticket)"
+                (onTakeTicket)="handleTakeTicket(ticket.id)">
+              </app-ticket-card>
+            }
+          </div>
+
+          @if (filteredTickets().length === 0) {
+            <div class="text-center py-16">
+              <i-lucide name="alert-circle" class="w-16 h-16 text-muted-foreground mx-auto mb-4"></i-lucide>
+              <p class="text-xl text-muted-foreground">
+                {{ visibleTickets().length === 0 ? (user.role === 'usuario' ? 'No tienes tickets creados' : (user.role === 'tecnico' ? 'No tienes tickets asignados' : 'No hay tickets en el sistema')) : 'No se encontraron tickets con los filtros aplicados' }}
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- Modals -->
+    <app-new-ticket-modal
+      [isOpen]="isNewTicketOpen()"
+      [categories]="categories()"
+      [priorities]="priorities()"
+      (onClose)="isNewTicketOpen.set(false)"
+      (onSubmit)="handleCreateTicket($event)">
+    </app-new-ticket-modal>
+
+    <app-create-technician-modal
+      [isOpen]="isCreateTechnicianOpen()"
+      (onClose)="isCreateTechnicianOpen.set(false)"
+      (onSubmit)="handleCreateTechnician($event)">
+    </app-create-technician-modal>
+
+    <app-create-admin-modal
+      [isOpen]="isCreateAdminOpen()"
+      (onClose)="isCreateAdminOpen.set(false)"
+      (onSubmit)="handleCreateAdmin($event)">
+    </app-create-admin-modal>
+
+    @if (selectedTicket()) {
+      <app-ticket-detail-modal
+        [isOpen]="!!selectedTicket()"
+        [ticket]="selectedTicket()"
+        [currentUser]="user"
+        [technicians]="technicians()"
+        [allUsers]="validUsers()"
+        (onClose)="selectedTicket.set(null)"
+        (onUpdateStatus)="handleUpdateStatus(selectedTicket()!.id, $event)"
+        (onAddComment)="handleAddComment(selectedTicket()!.id, $event)"
+        (onAssignTicket)="handleAssignTicket(selectedTicket()!.id, $event)">
+      </app-ticket-detail-modal>
+    }
+
+    <app-notifications-panel
+      [isOpen]="isNotificationsOpen()"
+      [notifications]="notifications()"
+      (onClose)="isNotificationsOpen.set(false)"
+      (onMarkAsRead)="handleMarkNotificationAsRead($event)"
+      (onMarkAllAsRead)="handleMarkAllNotificationsAsRead()"
+      (onOpenTicket)="handleOpenTicketFromNotification($event)">
+    </app-notifications-panel>
+  </div>
+}

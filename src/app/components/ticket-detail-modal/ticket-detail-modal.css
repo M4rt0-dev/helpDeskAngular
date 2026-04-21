@@ -1,0 +1,39 @@
+.timeline-list {
+	padding-right: 0.25rem;
+}
+
+.timeline-item:last-child .timeline-track {
+	background: transparent;
+}
+
+.timeline-track {
+	position: relative;
+	width: 1px;
+	background: var(--border);
+}
+
+.timeline-dot {
+	position: absolute;
+	top: 0.5rem;
+	left: 50%;
+	width: 0.75rem;
+	height: 0.75rem;
+	border-radius: 9999px;
+	transform: translateX(-50%);
+}
+
+.timeline-dot-created {
+	background: #22c55e;
+}
+
+.timeline-dot-status {
+	background: var(--primary);
+}
+
+.timeline-dot-assigned {
+	background: #8b5cf6;
+}
+
+.timeline-dot-comment {
+	background: #008046;
+}

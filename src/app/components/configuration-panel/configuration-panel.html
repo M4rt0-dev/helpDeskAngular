@@ -1,0 +1,104 @@
+<div class="p-8">
+	<div class="mb-8">
+		<div class="flex items-center gap-3 mb-2">
+			<i-lucide name="settings" class="w-8 h-8 text-primary"></i-lucide>
+			<h2 class="text-3xl">Configuración del Sistema</h2>
+		</div>
+		<p class="text-muted-foreground">Gestiona las categorías y prioridades de tickets</p>
+	</div>
+
+	<div class="mb-12">
+		<h3 class="text-xl mb-4">Categorías de Tickets</h3>
+
+		<div class="bg-card border border-border rounded-lg p-6 mb-4">
+			<div class="space-y-3">
+				@for (category of categories(); track category.id) {
+					<div class="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+						<div>
+							<p class="font-medium">{{ category.label }}</p>
+							<p class="text-sm text-muted-foreground">ID: {{ category.id }} | Nombre: {{ category.name }}</p>
+						</div>
+						<button (click)="deleteCategory(category.id)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+							<i-lucide name="trash-2" class="w-5 h-5"></i-lucide>
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+
+		<div class="bg-card border border-border rounded-lg p-6">
+			<h4 class="font-medium mb-4">Agregar Nueva Categoría</h4>
+			<div class="space-y-4">
+				<div class="grid grid-cols-3 gap-4">
+					<div>
+						<label class="block text-sm mb-2 text-foreground">ID (único) *</label>
+						<input type="text" [ngModel]="newCategory().id" (ngModelChange)="updateCategoryField('id', $event)" placeholder="ej: soporte-tecnico" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+					<div>
+						<label class="block text-sm mb-2 text-foreground">Nombre interno *</label>
+						<input type="text" [ngModel]="newCategory().name" (ngModelChange)="updateCategoryField('name', $event)" placeholder="ej: Soporte Técnico" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+					<div>
+						<label class="block text-sm mb-2 text-foreground">Etiqueta visible *</label>
+						<input type="text" [ngModel]="newCategory().label" (ngModelChange)="updateCategoryField('label', $event)" placeholder="ej: Soporte Técnico" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+				</div>
+				<button (click)="addCategory()" class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+					<i-lucide name="plus" class="w-5 h-5"></i-lucide>
+					<span>Agregar Categoría</span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div>
+		<h3 class="text-xl mb-4">Prioridades de Tickets</h3>
+
+		<div class="bg-card border border-border rounded-lg p-6 mb-4">
+			<div class="space-y-3">
+				@for (priority of priorities(); track priority.id) {
+					<div class="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+						<div class="flex items-center gap-4">
+							<div class="w-4 h-4 rounded" [style.background-color]="priority.color"></div>
+							<div>
+								<p class="font-medium">{{ priority.label }}</p>
+								<p class="text-sm text-muted-foreground">ID: {{ priority.id }} | Color: {{ priority.color }}</p>
+							</div>
+						</div>
+						<button (click)="deletePriority(priority.id)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+							<i-lucide name="trash-2" class="w-5 h-5"></i-lucide>
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+
+		<div class="bg-card border border-border rounded-lg p-6">
+			<h4 class="font-medium mb-4">Agregar Nueva Prioridad</h4>
+			<div class="space-y-4">
+				<div class="grid grid-cols-4 gap-4">
+					<div>
+						<label class="block text-sm mb-2 text-foreground">ID (único) *</label>
+						<input type="text" [ngModel]="newPriority().id" (ngModelChange)="updatePriorityField('id', $event)" placeholder="ej: urgente" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+					<div>
+						<label class="block text-sm mb-2 text-foreground">Nombre interno *</label>
+						<input type="text" [ngModel]="newPriority().name" (ngModelChange)="updatePriorityField('name', $event)" placeholder="ej: Urgente" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+					<div>
+						<label class="block text-sm mb-2 text-foreground">Etiqueta visible *</label>
+						<input type="text" [ngModel]="newPriority().label" (ngModelChange)="updatePriorityField('label', $event)" placeholder="ej: Urgente" class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+					</div>
+					<div>
+						<label class="block text-sm mb-2 text-foreground">Color (hex) *</label>
+						<input type="color" [ngModel]="newPriority().color" (ngModelChange)="updatePriorityField('color', $event)" class="configuration-color-input" />
+					</div>
+				</div>
+				<button (click)="addPriority()" class="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+					<i-lucide name="plus" class="w-5 h-5"></i-lucide>
+					<span>Agregar Prioridad</span>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

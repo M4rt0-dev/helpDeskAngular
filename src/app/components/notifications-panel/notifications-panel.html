@@ -1,0 +1,66 @@
+@if (isOpen()) {
+  <div (click)="onClose.emit()" class="fixed inset-0 bg-black/50 z-50"></div>
+
+  <div class="fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border shadow-xl z-50 flex flex-col">
+    <div class="border-b border-border p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <i-lucide name="bell" class="w-6 h-6 text-primary"></i-lucide>
+          <h2 class="text-xl">Notificaciones</h2>
+          @if (unreadCount() > 0) {
+            <span class="px-2 py-0.5 bg-primary text-white text-sm rounded-full">{{ unreadCount() }}</span>
+          }
+        </div>
+        <button (click)="onClose.emit()" class="p-2 hover:bg-muted rounded-lg transition-colors">
+          <span class="text-xl">✕</span>
+        </button>
+      </div>
+
+      @if (unreadCount() > 0) {
+        <button (click)="onMarkAllAsRead.emit()" class="text-sm text-primary hover:underline">
+          Marcar todas como leídas
+        </button>
+      }
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+      @if (notifications().length === 0) {
+        <div class="flex flex-col items-center justify-center h-full p-8 text-center">
+          <i-lucide name="bell" class="w-16 h-16 text-muted-foreground mb-4"></i-lucide>
+          <p class="text-muted-foreground">No tienes notificaciones</p>
+        </div>
+      } @else {
+        <div class="divide-y divide-border">
+          @for (notif of notifications(); track notif.id) {
+            <div
+              class="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+              [class.bg-primary-5]="!notif.read"
+              (click)="!notif.read && onMarkAsRead.emit(notif.id); handleTicketClick(notif.ticketId)"
+            >
+              <div class="flex gap-3">
+                <div class="flex-shrink-0 mt-1">
+                  <i-lucide [name]="getIconName(notif.type)" class="w-5 h-5 text-primary"></i-lucide>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2 mb-1">
+                    <p class="text-sm" [class.font-semibold]="!notif.read" [class.font-medium]="notif.read">{{ notif.title }}</p>
+                    @if (!notif.read) {
+                      <div class="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5"></div>
+                    }
+                  </div>
+                  <p class="text-sm text-muted-foreground mb-2">{{ notif.message }}</p>
+                  <div class="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                    <span>{{ notif.timestamp }}</span>
+                    @if (notif.ticketId) {
+                      <span class="text-primary">{{ notif.ticketId }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

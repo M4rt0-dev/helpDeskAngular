@@ -1,0 +1,67 @@
+@if (isOpen()) {
+	<div (click)="close()" class="fixed inset-0 bg-black/50 z-50"></div>
+
+	<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 px-4">
+		<div class="bg-card border border-border rounded-lg shadow-lg">
+			<div class="border-b border-border p-6">
+				<div class="flex items-center justify-between">
+					<h2 class="text-xl">Crear Administrador Nuevo</h2>
+					<button type="button" (click)="close()" class="p-2 hover:bg-muted rounded-lg transition-colors">
+						<i-lucide name="x" class="w-5 h-5"></i-lucide>
+					</button>
+				</div>
+			</div>
+
+			<form (ngSubmit)="submit()" class="p-6 space-y-5">
+				<div>
+					<label class="block text-sm mb-2 text-foreground">Nombre completo *</label>
+					<input
+						type="text"
+						required
+						[ngModel]="formData().name"
+						(ngModelChange)="updateName($event)"
+						name="name"
+						class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+						placeholder="Ej: Roberto López"
+					/>
+				</div>
+
+				<div>
+					<label class="block text-sm mb-2 text-foreground">Usuario *</label>
+					<input
+						type="text"
+						required
+						[ngModel]="formData().username"
+						(ngModelChange)="updateUsername($event)"
+						name="username"
+						class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+						placeholder="Ej: rlopez"
+					/>
+				</div>
+
+				<div>
+					<label class="block text-sm mb-2 text-foreground">Contraseña *</label>
+					<input
+						type="password"
+						required
+						minlength="6"
+						[ngModel]="formData().password"
+						(ngModelChange)="updatePassword($event)"
+						name="password"
+						class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+						placeholder="Mínimo 6 caracteres"
+					/>
+				</div>
+
+				<div class="flex gap-3 pt-4">
+					<button type="button" (click)="close()" class="flex-1 px-6 py-2.5 border border-border rounded-lg text-foreground hover:bg-muted transition-colors">
+						Cancelar
+					</button>
+					<button type="submit" class="flex-1 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+						Crear Administrador
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}

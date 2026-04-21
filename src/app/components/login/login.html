@@ -1,0 +1,84 @@
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-lg mb-4">
+        <i-lucide name="file-text" class="w-10 h-10 text-white"></i-lucide>
+      </div>
+      <h1 class="text-3xl mb-2">HelpDesk</h1>
+      <p class="text-muted-foreground">Sistema de Gestión de Incidencias</p>
+    </div>
+
+    <div class="bg-card border border-border rounded-lg p-8 shadow-lg">
+      <h2 class="text-xl mb-6">Iniciar Sesión</h2>
+
+      <form (ngSubmit)="submit()" class="space-y-5">
+        <div>
+          <label class="block text-sm mb-2 text-foreground espaciar2">Usuario</label>
+          <input
+            type="text"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+            name="username"
+            class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Tu usuario"
+            autofocus
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm mb-2 text-foreground espaciar2">Contraseña</label>
+          <input
+            type="password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            name="password"
+            class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Tu contraseña"
+          />
+        </div>
+
+        @if (error()) {
+          <div class="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <i-lucide name="alert-circle" class="w-5 h-5 flex-shrink-0"></i-lucide>
+            <span class="text-sm">{{ error() }}</span>
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed espaciar1"
+        >
+          <i-lucide name="log-in" class="w-5 h-5"></i-lucide>
+          <span>{{ isLoading() ? 'Verificando...' : 'Ingresar' }}</span>
+        </button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <p class="text-sm text-muted-foreground">
+          ¿No tienes cuenta?
+          <button type="button" (click)="openRegister()" class="text-primary hover:underline ml-1">
+            Regístrate aquí
+          </button>
+        </p>
+      </div>
+
+      <div class="mt-6 p-4 bg-muted/50 border border-border rounded-lg">
+        <p class="text-sm text-muted-foreground mb-2">Usuarios de prueba:</p>
+        <div class="space-y-1 text-sm">
+          <p><span class="font-medium">Admin:</span> admin / admin123</p>
+          <p><span class="font-medium">Técnico 1:</span> tecnico / tecnico123</p>
+          <p><span class="font-medium">Técnico 2:</span> tecnico2 / tecnico123</p>
+          <p><span class="font-medium">Técnico 3:</span> tecnico3 / tecnico123</p>
+          <p><span class="font-medium">Usuario 1:</span> usuario / usuario123</p>
+          <p><span class="font-medium">Usuario 2:</span> maria / maria123</p>
+          <p><span class="font-medium">Usuario 3:</span> pedro / pedro123</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center text-sm text-muted-foreground mt-6">
+      © 2026 HelpDesk - Sistema de Gestión de Incidencias
+    </p>
+  </div>
+</div>

@@ -1,0 +1,152 @@
+@if (isOpen() && ticket()) {
+  <div (click)="onClose.emit()" class="fixed inset-0 bg-black/50 z-50"></div>
+
+  <div class="fixed top-0 right-0 h-full w-full max-w-3xl z-50 overflow-y-auto bg-background shadow-xl">
+    <div class="min-h-full">
+      <div class="sticky top-0 z-20 border-b border-border p-6 bg-card">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="text-sm text-muted-foreground mb-2">{{ ticket()!.id }}</div>
+            <h2 class="text-2xl mb-3">{{ ticket()!.title }}</h2>
+            <div class="flex items-center gap-3">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-muted">
+                {{ ticket()!.status.charAt(0).toUpperCase() + ticket()!.status.slice(1) }}
+              </div>
+            </div>
+          </div>
+          <button (click)="onClose.emit()" class="p-2 hover:bg-muted rounded-lg transition-colors">
+            <span class="text-xl">✕</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 border border-border rounded-lg bg-card">
+            <div class="flex items-center gap-2 mb-2 text-muted-foreground">
+              <i-lucide name="tag" class="w-4 h-4"></i-lucide>
+              <span class="text-sm">Prioridad</span>
+            </div>
+            <p class="text-lg">{{ ticket()!.priority.charAt(0).toUpperCase() + ticket()!.priority.slice(1) }}</p>
+          </div>
+
+          <div class="p-4 border border-border rounded-lg bg-card">
+            <div class="flex items-center gap-2 mb-2 text-muted-foreground">
+              <i-lucide name="tag" class="w-4 h-4"></i-lucide>
+              <span class="text-sm">Categoría</span>
+            </div>
+            <p class="text-lg">{{ ticket()!.category.charAt(0).toUpperCase() + ticket()!.category.slice(1) }}</p>
+          </div>
+
+          <div class="p-4 border border-border rounded-lg bg-card">
+            <div class="flex items-center gap-2 mb-2 text-muted-foreground">
+              <i-lucide name="user" class="w-4 h-4"></i-lucide>
+              <span class="text-sm">Asignado a</span>
+            </div>
+            @if (canAssign() && !ticket()!.assignedTo) {
+              <select (ngModelChange)="onAssignTicket.emit($event)" [ngModel]="ticket()!.assignedTo || ''" class="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <option value="">Asignar técnico...</option>
+                @for (tech of technicians(); track tech.username) {
+                  <option [value]="tech.username">{{ tech.name }}</option>
+                }
+              </select>
+            } @else {
+              <p class="text-lg">{{ getUserName(ticket()!.assignedTo) }}</p>
+            }
+          </div>
+
+          <div class="p-4 border border-border rounded-lg bg-card">
+            <div class="flex items-center gap-2 mb-2 text-muted-foreground">
+              <i-lucide name="calendar" class="w-4 h-4"></i-lucide>
+              <span class="text-sm">Creado</span>
+            </div>
+            <p>{{ ticket()!.createdAt }}</p>
+          </div>
+        </div>
+
+        <div class="p-5 border border-border rounded-lg bg-card">
+          <h3 class="text-sm mb-3 text-muted-foreground">Descripción</h3>
+          <p class="text-foreground leading-relaxed">{{ ticket()!.description }}</p>
+        </div>
+
+        @if (canEditStatus()) {
+          <div class="space-y-3">
+            <h3 class="text-sm text-muted-foreground">Cambiar Estado</h3>
+            <div class="grid grid-cols-2 gap-3">
+              @for (status of statuses; track status) {
+                <button (click)="onUpdateStatus.emit(status)" [disabled]="ticket()!.status === status" class="p-3 rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed" [class]="getStatusButtonClass(status)">
+                  {{ status.charAt(0).toUpperCase() + status.slice(1) }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <i-lucide name="activity" class="w-4 h-4 text-muted-foreground"></i-lucide>
+            <h3 class="text-sm text-muted-foreground">Historial Completo ({{ ticket()!.activities.length }} eventos)</h3>
+          </div>
+
+          <div class="space-y-0 max-h-96 overflow-y-auto timeline-list">
+            @if (ticket()!.activities.length > 0) {
+              @for (activity of ticket()!.activities; track activity.id) {
+                <div class="flex gap-4 timeline-item">
+                  <div class="timeline-track">
+                    <div class="timeline-dot" [class.timeline-dot-created]="activity.type === 'created'" [class.timeline-dot-status]="activity.type === 'status_changed'" [class.timeline-dot-assigned]="activity.type === 'assigned'" [class.timeline-dot-comment]="activity.type === 'comment'"></div>
+                  </div>
+                  <div class="flex-1 pb-4">
+                    @switch (activity.type) {
+                      @case ('created') {
+                        <p class="text-sm">Ticket creado</p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ activity.timestamp }}</p>
+                      }
+                      @case ('status_changed') {
+                        <p class="text-sm">Estado cambiado: <span class="text-muted-foreground">{{ activity.oldValue }}</span> → <span class="text-primary">{{ activity.newValue }}</span></p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ activity.timestamp }}</p>
+                      }
+                      @case ('assigned') {
+                        <p class="text-sm">Asignado a: <span class="text-primary">{{ getUserName(activity.newValue) }}</span></p>
+                        <p class="text-xs text-muted-foreground mt-1">{{ activity.timestamp }}</p>
+                      }
+                      @case ('comment') {
+                        <div class="p-4 border border-border rounded-lg bg-card">
+                          <div class="flex items-center gap-2 mb-2">
+                            <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                              <i-lucide name="user" class="w-4 h-4 text-primary"></i-lucide>
+                            </div>
+                            <div class="flex-1">
+                              <p class="text-sm">{{ getUserName(activity.author) }}</p>
+                              <p class="text-xs text-muted-foreground">{{ activity.timestamp }}</p>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 rounded" [class]="getRoleBadgeClass(activity.authorRole)">{{ activity.authorRole }}</span>
+                          </div>
+                          <p class="text-sm text-foreground">{{ activity.message }}</p>
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <p class="text-sm text-muted-foreground text-center py-4">No hay actividad registrada</p>
+            }
+          </div>
+
+          @if (canComment()) {
+            <div class="flex gap-2 pt-2 border-t border-border">
+              <input type="text" [ngModel]="newComment()" (ngModelChange)="newComment.set($event)" placeholder="Agrega un comentario..." class="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+              <button (click)="addComment()" [disabled]="!newComment().trim()" class="px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i-lucide name="send" class="w-5 h-5"></i-lucide>
+              </button>
+            </div>
+          } @else {
+            <div class="pt-2 border-t border-border">
+              <p class="text-sm text-muted-foreground text-center py-4 bg-muted/50 rounded-lg">Ticket cerrado. Ya no puedes agregar comentarios</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

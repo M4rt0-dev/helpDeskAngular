@@ -1,0 +1,115 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <lucide-icon [img]="Shield" class="w-8 h-8 text-primary"></lucide-icon>
+      <h2 class="text-3xl">Logs de Seguridad</h2>
+    </div>
+    <p class="text-muted-foreground">Registro de eventos de seguridad del sistema (OWASP A09:2021)</p>
+  </div>
+
+  <!-- Filtros -->
+  <div class="mb-6 flex gap-2">
+    <button
+      (click)="filter = 'all'"
+      [class.bg-primary]="filter === 'all'"
+      [class.text-white]="filter === 'all'"
+      [class.bg-card]="filter !== 'all'"
+      [class.border]="filter !== 'all'"
+      [class.border-border]="filter !== 'all'"
+      [class.text-foreground]="filter !== 'all'"
+      [class.hover:bg-muted]="filter !== 'all'"
+      class="px-4 py-2 rounded-lg transition-colors">
+      Todos ({{ logs.length }})
+    </button>
+    <button
+      (click)="filter = 'info'"
+      [class.bg-primary]="filter === 'info'"
+      [class.text-white]="filter === 'info'"
+      [class.bg-card]="filter !== 'info'"
+      [class.border]="filter !== 'info'"
+      [class.border-border]="filter !== 'info'"
+      [class.text-foreground]="filter !== 'info'"
+      [class.hover:bg-muted]="filter !== 'info'"
+      class="px-4 py-2 rounded-lg transition-colors">
+      Info ({{ getLogCount('info') }})
+    </button>
+    <button
+      (click)="filter = 'warning'"
+      [class.bg-primary]="filter === 'warning'"
+      [class.text-white]="filter === 'warning'"
+      [class.bg-card]="filter !== 'warning'"
+      [class.border]="filter !== 'warning'"
+      [class.border-border]="filter !== 'warning'"
+      [class.text-foreground]="filter !== 'warning'"
+      [class.hover:bg-muted]="filter !== 'warning'"
+      class="px-4 py-2 rounded-lg transition-colors">
+      Advertencias ({{ getLogCount('warning') }})
+    </button>
+    <button
+      (click)="filter = 'error'"
+      [class.bg-primary]="filter === 'error'"
+      [class.text-white]="filter === 'error'"
+      [class.bg-card]="filter !== 'error'"
+      [class.border]="filter !== 'error'"
+      [class.border-border]="filter !== 'error'"
+      [class.text-foreground]="filter !== 'error'"
+      [class.hover:bg-muted]="filter !== 'error'"
+      class="px-4 py-2 rounded-lg transition-colors">
+      Errores ({{ getLogCount('error') }})
+    </button>
+    <button
+      (click)="filter = 'critical'"
+      [class.bg-primary]="filter === 'critical'"
+      [class.text-white]="filter === 'critical'"
+      [class.bg-card]="filter !== 'critical'"
+      [class.border]="filter !== 'critical'"
+      [class.border-border]="filter !== 'critical'"
+      [class.text-foreground]="filter !== 'critical'"
+      [class.hover:bg-muted]="filter !== 'critical'"
+      class="px-4 py-2 rounded-lg transition-colors">
+      Crítico ({{ getLogCount('critical') }})
+    </button>
+  </div>
+
+  <!-- Logs -->
+  <div class="space-y-3">
+    @if (filteredLogs.length === 0) {
+      <div class="text-center py-12 bg-card border border-border rounded-lg">
+        <lucide-icon [img]="Shield" class="w-12 h-12 text-muted-foreground mx-auto mb-3"></lucide-icon>
+        <p class="text-muted-foreground">No hay logs de seguridad registrados</p>
+      </div>
+    } @else {
+      @for (log of filteredLogs; track $index) {
+        <div [class]="'border rounded-lg p-4 mb-4 ' + getLevelColor(log.level)">
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5">
+              <lucide-icon [img]="getIcon(log.level)" class="w-5 h-5"></lucide-icon>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4 mb-2">
+                <div>
+                  <p class="font-medium mt-0">{{ log.event.replace(/_/g, ' ').toUpperCase() }}</p>
+                  @if (log.user) {
+                    <p class="text-sm opacity-75">Usuario: {{ log.user }}</p>
+                  }
+                </div>
+                <div class="text-sm opacity-75 whitespace-nowrap">
+                  {{ formatTimestamp(log.timestamp) }}
+                </div>
+              </div>
+              @if (hasDetails(log)) {
+                <div class="mt-2 text-sm opacity-90">
+                  <details class="cursor-pointer">
+                    <summary class="font-medium">Detalles</summary>
+                    <pre class="mt-2 p-2 bg-black/10 rounded overflow-x-auto text-xs">{{ log.details | json }}</pre>
+                  </details>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,13 @@
+@if (issues().length > 0) {
+  <div class="bg-red-500 text-white p-4">
+    <div class="flex items-center gap-2 mb-2 font-bold">
+      <lucide-icon name="alert-triangle"></lucide-icon>
+      Advertencia de Seguridad
+    </div>
+    <ul class="list-disc pl-6 text-sm">
+      @for (issue of issues(); track $index) {
+        <li>{{ issue }}</li>
+      }
+    </ul>
+  </div>
+}
