@@ -11,7 +11,7 @@
             <span class="px-2 py-0.5 bg-primary text-white text-sm rounded-full">{{ unreadCount() }}</span>
           }
         </div>
-        <button (click)="onClose.emit()" class="p-2 hover:bg-muted rounded-lg transition-colors">
+        <button (click)="onClose.emit()" class="px-2 py-4 hover:bg-muted rounded-lg transition-colors">
           <span class="text-xl">✕</span>
         </button>
       </div>
@@ -43,7 +43,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-2 mb-1">
-                    <p class="text-sm" [class.font-semibold]="!notif.read" [class.font-medium]="notif.read">{{ notif.title }}</p>
+                    <p class="text-sm mt-7 " [class.font-semibold]="!notif.read" [class.font-medium]="notif.read">{{ notif.title }}</p>
                     @if (!notif.read) {
                       <div class="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5"></div>
                     }
