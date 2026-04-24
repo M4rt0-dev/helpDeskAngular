@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -21,7 +21,21 @@ export class CreateAdminModal {
     name: ''
   });
 
+  passwordChecks = computed(() => {
+    const p = this.formData().password;
+    return {
+      minLength: p.length >= 8,
+      hasUpper: /[A-Z]/.test(p),
+      hasLower: /[a-z]/.test(p),
+      hasNumber: /\d/.test(p),
+      hasSpecial: /[-_.@]/.test(p),
+    };
+  });
+
+  isPasswordValid = computed(() => Object.values(this.passwordChecks()).every(Boolean));
+
   submit() {
+    if (!this.isPasswordValid()) return;
     this.onSubmit.emit(this.formData());
     this.close();
   }

@@ -50,7 +50,27 @@
             class="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             placeholder="Mínimo 8 caracteres, mayúscula, número y símbolo"
             minlength="8"
+            aria-describedby="register-pwd-requirements"
           />
+          @if (data().password.length > 0) {
+            <ul id="register-pwd-requirements" class="mt-2 space-y-1 text-xs" aria-label="Requisitos de contraseña">
+              <li [class]="passwordChecks().minLength ? 'text-green-600' : 'text-red-500'" [attr.aria-label]="passwordChecks().minLength ? 'Cumplido: mínimo 8 caracteres' : 'Pendiente: mínimo 8 caracteres'">
+                {{ passwordChecks().minLength ? '✓' : '✗' }} Mínimo 8 caracteres
+              </li>
+              <li [class]="passwordChecks().hasUpper ? 'text-green-600' : 'text-red-500'" [attr.aria-label]="passwordChecks().hasUpper ? 'Cumplido: mayúscula' : 'Pendiente: mayúscula'">
+                {{ passwordChecks().hasUpper ? '✓' : '✗' }} Al menos una mayúscula
+              </li>
+              <li [class]="passwordChecks().hasLower ? 'text-green-600' : 'text-red-500'" [attr.aria-label]="passwordChecks().hasLower ? 'Cumplido: minúscula' : 'Pendiente: minúscula'">
+                {{ passwordChecks().hasLower ? '✓' : '✗' }} Al menos una minúscula
+              </li>
+              <li [class]="passwordChecks().hasNumber ? 'text-green-600' : 'text-red-500'" [attr.aria-label]="passwordChecks().hasNumber ? 'Cumplido: número' : 'Pendiente: número'">
+                {{ passwordChecks().hasNumber ? '✓' : '✗' }} Al menos un número
+              </li>
+              <li [class]="passwordChecks().hasSpecial ? 'text-green-600' : 'text-red-500'" [attr.aria-label]="passwordChecks().hasSpecial ? 'Cumplido: carácter especial' : 'Pendiente: carácter especial'">
+                {{ passwordChecks().hasSpecial ? '✓' : '✗' }} Al menos un carácter especial (-, _, . o @)
+              </li>
+            </ul>
+          }
         </div>
 
         <div class="flex gap-3 pt-4">
@@ -63,7 +83,8 @@
           </button>
           <button
             type="submit"
-            class="flex-1 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            [disabled]="!isPasswordValid()"
+            class="flex-1 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Crear Cuenta
           </button>

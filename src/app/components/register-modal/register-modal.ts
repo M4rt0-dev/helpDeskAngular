@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -16,7 +16,21 @@ export class RegisterModal {
 
   data = signal({ username: '', password: '', name: '' });
 
+  passwordChecks = computed(() => {
+    const p = this.data().password;
+    return {
+      minLength: p.length >= 8,
+      hasUpper: /[A-Z]/.test(p),
+      hasLower: /[a-z]/.test(p),
+      hasNumber: /\d/.test(p),
+      hasSpecial: /[-_.@]/.test(p),
+    };
+  });
+
+  isPasswordValid = computed(() => Object.values(this.passwordChecks()).every(Boolean));
+
   submit() {
+    if (!this.isPasswordValid()) return;
     this.onSubmit.emit(this.data());
     this.data.set({ username: '', password: '', name: '' });
     this.onClose.emit();

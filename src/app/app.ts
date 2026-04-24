@@ -396,6 +396,12 @@ export class App implements OnInit {
       return;
     }
 
+    const passwordStrength = Security.validatePasswordStrength(technicianData.password);
+    if (!passwordStrength.valid) {
+      alert(`Error: La contraseña no cumple los requisitos de seguridad:\n\n${passwordStrength.issues.join('\n')}`);
+      return;
+    }
+
     if (this.validUsers().some(item => item.username === sanitizedUsername)) {
       alert('Error: El nombre de usuario ya existe');
       return;
@@ -426,6 +432,12 @@ export class App implements OnInit {
 
     if (this.validUsers().some(item => item.username === sanitizedUsername)) {
       alert('Error: El nombre de usuario ya existe');
+      return;
+    }
+
+    const adminPasswordStrength = Security.validatePasswordStrength(adminData.password);
+    if (!adminPasswordStrength.valid) {
+      alert(`Error: La contraseña no cumple los requisitos de seguridad:\n\n${adminPasswordStrength.issues.join('\n')}`);
       return;
     }
 

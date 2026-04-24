@@ -314,9 +314,9 @@ export function validatePasswordStrength(password: string): {
     score += 1;
   }
 
-  // Caracteres especiales
-  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-    issues.push('Debe contener al menos un carácter especial');
+  // Caracteres especiales (-, _, . o @)
+  if (!/[-_.@]/.test(password)) {
+    issues.push('Debe contener al menos un carácter especial (-, _, . o @)');
   } else {
     score += 1;
   }
