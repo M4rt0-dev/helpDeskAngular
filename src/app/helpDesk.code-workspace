@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../Downloads/HelpDesk1"
+		}
+	],
+	"settings": {
+		"liveServer.settings.port": 5501
+	}
+}
