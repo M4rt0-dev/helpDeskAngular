@@ -1,4 +1,7 @@
 import DOMPurify from 'dompurify';
+import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
+import { doc, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { environment } from '../environments/environment';
 
 /**
  * Módulo de Seguridad - OWASP Top 10 2025 Compliance
@@ -201,6 +204,30 @@ export interface SecurityLog {
   details?: Record<string, unknown>;
 }
 
+let firebaseAppInstance: FirebaseApp | null = null;
+
+function getSecurityLogsDocRef() {
+  if (!firebaseAppInstance) {
+    firebaseAppInstance = getApps().length > 0 ? getApp() : initializeApp(environment.firebase);
+  }
+
+  const db = getFirestore(firebaseAppInstance);
+  return doc(db, environment.helpdeskCollection, 'helpdesk_security_logs');
+}
+
+function syncSecurityLogsToFirebase(logs: SecurityLog[]): void {
+  void setDoc(
+    getSecurityLogsDocRef(),
+    {
+      value: JSON.stringify(logs),
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  ).catch((error) => {
+    console.error('Error al sincronizar logs de seguridad en Firebase:', error);
+  });
+}
+
 // A09:2021 - Security Logging and Monitoring Failures
 // Registrar evento de seguridad
 export function logSecurityEvent(log: Omit<SecurityLog, 'timestamp'>): void {
@@ -221,6 +248,7 @@ export function logSecurityEvent(log: Omit<SecurityLog, 'timestamp'>): void {
     }
 
     localStorage.setItem('helpdesk_security_logs', JSON.stringify(logs));
+    syncSecurityLogsToFirebase(logs);
 
     // Log crítico también en consola
     if (log.level === 'critical' || log.level === 'error') {
