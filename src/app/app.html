@@ -154,7 +154,7 @@
 
     <!-- Main Content -->
     <div class="flex-1 overflow-y-auto">
-      
+
       <section [hidden]="activeView() !== 'logs' || user.role !== 'admin'">
         <app-security-logs></app-security-logs>
       </section>
@@ -201,7 +201,7 @@
                 </p>
               </div>
             }
-            
+
             @for (ticket of visibleTickets() | slice:0:4; track ticket.id) {
               <app-ticket-card
                 [ticket]="ticket"
@@ -237,8 +237,8 @@
 
             @if (user.role === 'tecnico' || user.role === 'admin') {
               <div class="flex gap-2">
-                <button 
-                  (click)="quickFilter.set('all')" 
+                <button
+                  (click)="quickFilter.set('all')"
                   [class.bg-primary]="quickFilter() === 'all'"
                   [class.text-white]="quickFilter() === 'all'"
                   [class.bg-card]="quickFilter() !== 'all'"
@@ -249,8 +249,8 @@
                   class="px-4 py-2 rounded-lg transition-colors">
                   Todos
                 </button>
-                <button 
-                  (click)="quickFilter.set('unassigned')" 
+                <button
+                  (click)="quickFilter.set('unassigned')"
                   [class.bg-primary]="quickFilter() === 'unassigned'"
                   [class.text-white]="quickFilter() === 'unassigned'"
                   [class.bg-card]="quickFilter() !== 'unassigned'"
@@ -262,8 +262,8 @@
                   <i-lucide name="alert-circle" class="w-4 h-4"></i-lucide>
                   Sin asignar
                 </button>
-                <button 
-                  (click)="quickFilter.set('urgent')" 
+                <button
+                  (click)="quickFilter.set('urgent')"
                   [class.bg-primary]="quickFilter() === 'urgent'"
                   [class.text-white]="quickFilter() === 'urgent'"
                   [class.bg-card]="quickFilter() !== 'urgent'"
@@ -274,8 +274,8 @@
                   class="px-4 py-2 rounded-lg transition-colors">
                   Urgentes
                 </button>
-                <button 
-                  (click)="quickFilter.set('mine')" 
+                <button
+                  (click)="quickFilter.set('mine')"
                   [class.bg-primary]="quickFilter() === 'mine'"
                   [class.text-white]="quickFilter() === 'mine'"
                   [class.bg-card]="quickFilter() !== 'mine'"

@@ -1,0 +1,18 @@
+nelmio_api_doc:
+  documentation:
+    openapi: 3.0.0
+    info:
+      title: HelpDesk Symfony API
+      description: API backend para HelpDesk Angular/Ionic con JWT
+      version: 1.0.0
+    components:
+      securitySchemes:
+        Bearer:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+    security:
+      - Bearer: []
+  areas:
+    path_patterns:
+      - ^/api(?!/docs$)

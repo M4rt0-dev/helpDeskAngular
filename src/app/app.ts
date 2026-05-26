@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,7 +17,6 @@ import { CreateTechnicianModal } from './components/create-technician-modal/crea
 import { CreateAdminModal } from './components/create-admin-modal/create-admin-modal';
 import { TicketDetailModal } from './components/ticket-detail-modal/ticket-detail-modal';
 import { NotificationsPanel } from './components/notifications-panel/notifications-panel';
-import { FirebaseHelpdeskService } from './firebase-helpdesk.service';
 
 @Component({
   selector: 'app-root',
@@ -44,8 +43,6 @@ import { FirebaseHelpdeskService } from './firebase-helpdesk.service';
   styleUrls: ['./app.css']
 })
 export class App implements OnInit {
-  private readonly firebaseStore = inject(FirebaseHelpdeskService);
-
   currentUser = signal<User | null>(null);
   validUsers = signal<User[]>([]);
   tickets = signal<TicketType[]>(initialTickets);
@@ -139,40 +136,11 @@ export class App implements OnInit {
       });
     }
 
-    await this.hydrateFromFirebase();
     this.loadUsers();
     this.loadCategories();
     this.loadPriorities();
     this.loadTickets();
     this.restoreSession();
-  }
-
-  private async hydrateFromFirebase() {
-    await this.firebaseStore.getItem('helpdesk_users');
-    await this.firebaseStore.getItem('helpdesk_categories');
-    await this.firebaseStore.getItem('helpdesk_priorities');
-    await this.firebaseStore.getItem('helpdesk_tickets');
-    await this.firebaseStore.getItem('helpdesk_security_logs');
-    await this.firebaseStore.getItem('helpdesk_user');
-
-    const savedUsers = localStorage.getItem('helpdesk_users');
-    if (!savedUsers) {
-      return;
-    }
-
-    try {
-      const users = JSON.parse(savedUsers) as User[];
-      if (!Array.isArray(users)) {
-        return;
-      }
-
-      for (const user of users) {
-        if (user?.username) {
-          await this.firebaseStore.getItem(`helpdesk_notifications_${user.username}`);
-        }
-      }
-    } catch {
-    }
   }
 
   private loadUsers() {
@@ -250,13 +218,13 @@ export class App implements OnInit {
     try {
       const user = JSON.parse(savedUser) as User;
       if (user.sessionTimestamp && Security.isSessionExpired(user.sessionTimestamp)) {
-        this.firebaseStore.removeItem('helpdesk_user');
+        localStorage.removeItem('helpdesk_user');
         alert('Tu sesión expiró. Necesitas iniciar sesión otra vez');
         return;
       }
 
       if (!user.username || !user.role || !user.sessionToken) {
-        this.firebaseStore.removeItem('helpdesk_user');
+        localStorage.removeItem('helpdesk_user');
         return;
       }
 
@@ -275,17 +243,17 @@ export class App implements OnInit {
         }
       }
     } catch {
-      this.firebaseStore.removeItem('helpdesk_user');
+      localStorage.removeItem('helpdesk_user');
     }
   }
 
   private setInitialUsers() {
     this.validUsers.set(initialUsers);
-    this.firebaseStore.setItem('helpdesk_users', JSON.stringify(initialUsers));
+    localStorage.setItem('helpdesk_users', JSON.stringify(initialUsers));
   }
 
   private persistTickets() {
-    this.firebaseStore.setItem('helpdesk_tickets', JSON.stringify(this.tickets()));
+    localStorage.setItem('helpdesk_tickets', JSON.stringify(this.tickets()));
   }
 
   private getTimestamp() {
@@ -357,7 +325,7 @@ export class App implements OnInit {
           this.validUsers.update(users =>
             users.map(item => (item.username === user.username ? { ...item, password: hashedPassword } : item))
           );
-          this.firebaseStore.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
+          localStorage.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
           Security.logSecurityEvent({
             level: 'info',
             event: 'password_migrated_to_hash',
@@ -386,7 +354,7 @@ export class App implements OnInit {
       };
 
       this.currentUser.set(sessionUser);
-      this.firebaseStore.setItem('helpdesk_user', JSON.stringify(sessionUser));
+      localStorage.setItem('helpdesk_user', JSON.stringify(sessionUser));
       Security.logSecurityEvent({
         level: 'info',
         event: 'login_success',
@@ -435,7 +403,7 @@ export class App implements OnInit {
     this.statusFilter.set('all');
     this.priorityFilter.set('all');
     this.quickFilter.set('all');
-    this.firebaseStore.removeItem('helpdesk_user');
+    localStorage.removeItem('helpdesk_user');
   }
 
   async handleCreateTechnician(technicianData: { username: string; password: string; name: string }) {
@@ -472,7 +440,7 @@ export class App implements OnInit {
     };
 
     this.validUsers.update(users => [...users, newTechnician]);
-    this.firebaseStore.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
+    localStorage.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
     this.isCreateTechnicianOpen.set(false);
     alert(`Técnico ${newTechnician.name} creado exitosamente`);
   }
@@ -506,7 +474,7 @@ export class App implements OnInit {
     };
 
     this.validUsers.update(users => [...users, newAdmin]);
-    this.firebaseStore.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
+    localStorage.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
     this.isCreateAdminOpen.set(false);
     alert(`Administrador ${newAdmin.name} creado exitosamente`);
   }
@@ -545,7 +513,7 @@ export class App implements OnInit {
     };
 
     this.validUsers.update(users => [...users, newUser]);
-  this.firebaseStore.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
+  localStorage.setItem('helpdesk_users', JSON.stringify(this.validUsers()));
 
     const sessionUser: User = {
       ...newUser,
@@ -556,7 +524,7 @@ export class App implements OnInit {
     this.currentUser.set(sessionUser);
     this.activeView.set(this.getDefaultViewForRole(sessionUser.role));
     this.isRegisterOpen.set(false);
-    this.firebaseStore.setItem('helpdesk_user', JSON.stringify(sessionUser));
+    localStorage.setItem('helpdesk_user', JSON.stringify(sessionUser));
   }
 
   addNotification(username: string, notification: Omit<Notification, 'id'>) {
@@ -577,7 +545,7 @@ export class App implements OnInit {
     }
 
     const updatedNotifications = [newNotification, ...userNotifications];
-  this.firebaseStore.setItem(`helpdesk_notifications_${username}`, JSON.stringify(updatedNotifications));
+  localStorage.setItem(`helpdesk_notifications_${username}`, JSON.stringify(updatedNotifications));
 
     if (this.currentUser()?.username === username) {
       this.notifications.set(updatedNotifications);
@@ -593,7 +561,7 @@ export class App implements OnInit {
     this.notifications.update(notifications => notifications.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
     ));
-    this.firebaseStore.setItem(`helpdesk_notifications_${user.username}`, JSON.stringify(this.notifications()));
+    localStorage.setItem(`helpdesk_notifications_${user.username}`, JSON.stringify(this.notifications()));
   }
 
   handleMarkAllNotificationsAsRead() {
@@ -603,17 +571,17 @@ export class App implements OnInit {
     }
 
     this.notifications.update(notifications => notifications.map(notification => ({ ...notification, read: true })));
-    this.firebaseStore.setItem(`helpdesk_notifications_${user.username}`, JSON.stringify(this.notifications()));
+    localStorage.setItem(`helpdesk_notifications_${user.username}`, JSON.stringify(this.notifications()));
   }
 
   handleUpdateCategories(newCategories: typeof initialCategories) {
     this.categories.set(newCategories);
-    this.firebaseStore.setItem('helpdesk_categories', JSON.stringify(newCategories));
+    localStorage.setItem('helpdesk_categories', JSON.stringify(newCategories));
   }
 
   handleUpdatePriorities(newPriorities: typeof initialPriorities) {
     this.priorities.set(newPriorities);
-    this.firebaseStore.setItem('helpdesk_priorities', JSON.stringify(newPriorities));
+    localStorage.setItem('helpdesk_priorities', JSON.stringify(newPriorities));
   }
 
   handleCreateTicket(newTicket: { title: string; description: string; priority: TicketPriority; category: string }) {

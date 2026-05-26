@@ -1,7 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LucideAngularModule, Shield, AlertTriangle, Info, AlertCircle, AlertOctagon } from 'lucide-angular';
 import { JsonPipe } from '@angular/common';
-import { FirebaseHelpdeskService } from '../../firebase-helpdesk.service';
 
 interface SecurityLog {
   timestamp: string;
@@ -20,8 +19,6 @@ interface SecurityLog {
   styleUrl: './security-logs.css'
 })
 export class SecurityLogs implements OnInit {
-  private readonly firebaseStore = inject(FirebaseHelpdeskService);
-
   logs: SecurityLog[] = [];
   filter: 'all' | 'info' | 'warning' | 'error' | 'critical' = 'all';
 
@@ -37,7 +34,6 @@ export class SecurityLogs implements OnInit {
 
   async loadLogs() {
     try {
-      await this.firebaseStore.getItem('helpdesk_security_logs');
       const savedLogs = localStorage.getItem('helpdesk_security_logs');
       if (savedLogs) {
         const parsedLogs = JSON.parse(savedLogs);
