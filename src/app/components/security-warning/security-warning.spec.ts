@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SecurityWarning } from './security-warning';
+import { SecurityWarningComponent } from './security-warning';
 
-describe('SecurityWarning', () => {
-  let component: SecurityWarning;
-  let fixture: ComponentFixture<SecurityWarning>;
+describe('SecurityWarningComponent', () => {
+  let component: SecurityWarningComponent;
+  let fixture: ComponentFixture<SecurityWarningComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SecurityWarning],
+      imports: [SecurityWarningComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SecurityWarning);
+    fixture = TestBed.createComponent(SecurityWarningComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
